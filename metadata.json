@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Velora",
+  "description": "Premium Dark Personal Finance \u0026 Investment App",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

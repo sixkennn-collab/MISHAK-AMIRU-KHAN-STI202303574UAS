@@ -1,11 +1,24 @@
-<div align="center">
+#Proyek UAS Mobile Programming Lanjut - Genap 2025/2026
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Aplikasi: Velora
+#v1.0.0
 
-  <h1>Built with AI Studio</h2>
+Dosen Pengampu: Nicolaus Euclides Wahyu Nugroho, S.Kom., M.Cs.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+Anggota Kelompok:
+M Ishak Amirul Khan(STI202303574
+Creat By MySelf to UAS 
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+Fitur Aplikasi:
+Splash Screen dengan Animasi
+Autentikasi Session (Login & API Integration)
+Manajemen State Katalog Produk
+Updates
+Add Income dan Outflow
+Add Assets offline Preview
+Add Monitor Integrity & Deviation Audits
+Add Velora Security & Preferences
+Add Biometrik Verification Request FingerPrints/FaceID priority to high amount transfers
+Add Local Ledger Encryption - on device Room SQlite database via SQLCipher keys.
+purge database records permanently in settings section
+Add interface login user password and logo
