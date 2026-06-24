@@ -43,7 +43,10 @@ class MainActivity : ComponentActivity() {
                     if (isLoggedIn) {
                         VeloraDashboard(viewModel = viewModel)
                     } else {
-                        VeloraLogin(onLoginSuccess = { isLoggedIn = true })
+                        VeloraLogin(onLoginSuccess = { isDuress ->
+                            viewModel.setCamouflageMode(isDuress)
+                            isLoggedIn = true
+                        })
                     }
                 }
             }

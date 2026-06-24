@@ -104,14 +104,34 @@ fun VeloraDashboard(viewModel: VeloraViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = "VELORA",
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            color = ChampagneGold,
-                            letterSpacing = 4.sp,
-                            fontSize = 32.sp
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "VELORA",
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                color = if (uiState.isCamouflageState) CrimsonRose else ChampagneGold,
+                                letterSpacing = 4.sp,
+                                fontSize = 32.sp
+                            )
                         )
-                    )
+                        if (uiState.isCamouflageState) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(CrimsonRose.copy(alpha = 0.2f))
+                                    .border(0.5.dp, CrimsonRose, RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    "CAMOUFLAGE VAULT",
+                                    color = CrimsonRose,
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = "PRIVATE WEALTH ENGINE",
                         style = MaterialTheme.typography.labelMedium.copy(
@@ -404,6 +424,161 @@ fun VeloraDashboard(viewModel: VeloraViewModel) {
                         amount = formatCurrency(uiState.goldValue),
                         indicatorColor = Color(0xFFFFD600)
                     )
+                }
+            }
+
+            // --- SEKSI INTELEGOR AI ADVISOR TERMINAL ---
+            var promptFieldText by remember { mutableStateOf("") }
+            val aiLoadingState by viewModel.aiLoading.collectAsStateWithLifecycle()
+            val aiResponseState by viewModel.aiResponse.collectAsStateWithLifecycle()
+            val aiIntentState by viewModel.parsedAiIntent.collectAsStateWithLifecycle()
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                border = BorderStroke(1.dp, ChampagneGold.copy(alpha = 0.3f)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (aiLoadingState) CrimsonRose else EmeraldMint)
+                        )
+                        Text(
+                            text = "VELORA CO-PILOT TERMINAL v1.5",
+                            color = ChampagneGold,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
+                    }
+
+                    Text(
+                        text = "Perintahkan AI penasihat kekayaan untuk menyimulasikan dana, rebalancing saham/kripto/emas, atau analisis portofolio offline.",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = promptFieldText,
+                            onValueChange = { promptFieldText = it },
+                            placeholder = { Text("Tulis perintah portfolio rebalance...", color = TextMuted, fontSize = 12.sp) },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = TextPrimary,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 12.sp
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = ChampagneGold,
+                                unfocusedBorderColor = Color(0xFF2C2C2C),
+                                focusedContainerColor = CharcoalCardAlt,
+                                unfocusedContainerColor = CharcoalCardAlt
+                            ),
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send)
+                        )
+
+                        Button(
+                            onClick = {
+                                if (promptFieldText.isNotBlank()) {
+                                    viewModel.tanyaVeloraAdvisor(promptFieldText)
+                                    promptFieldText = ""
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = ChampagneGold),
+                            contentPadding = PaddingValues(10.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            enabled = !aiLoadingState
+                        ) {
+                            if (aiLoadingState) {
+                                CircularProgressIndicator(color = ObsidianBackground, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                            } else {
+                                Icon(imageVector = Icons.Default.Send, contentDescription = "Send CMD", tint = ObsidianBackground, modifier = Modifier.size(18.dp))
+                            }
+                        }
+                    }
+
+                    // Tampilan response terminal
+                    if (aiLoadingState || aiResponseState != null) {
+                        Box(
+                            modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(CharcoalCardAlt)
+                                                    .border(0.5.dp, Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
+                                                    .padding(12.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "STATUS: " + if (aiLoadingState) "PROCESSING..." else "READY",
+                                        color = if (aiLoadingState) CrimsonRose else EmeraldMint,
+                                        fontSize = 10.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    if (aiResponseState != null) {
+                                        Text(
+                                            text = "INTENT: ${aiIntentState ?: "SIMULATE"}",
+                                            color = ChampagneGold,
+                                            fontSize = 10.sp,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    }
+                                }
+
+                                if (aiLoadingState) {
+                                    Text(
+                                        text = "> Menghubungkan jaringan orkestrasi asisten finansial Velora...",
+                                        color = TextSecondary,
+                                        fontSize = 11.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                } else {
+                                    aiResponseState?.let { text ->
+                                        Text(
+                                            text = text,
+                                            color = TextPrimary,
+                                            fontSize = 11.sp,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Button(
+                                            onClick = { viewModel.resetAIResponse() },
+                                            colors = ButtonDefaults.buttonColors(containerColor = CharcoalSurface),
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                            shape = RoundedCornerShape(4.dp)
+                                        ) {
+                                            Text("Clear Terminal", color = ChampagneGold, fontSize = 9.sp)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -1059,6 +1234,197 @@ fun VeloraDashboard(viewModel: VeloraViewModel) {
                                 uncheckedTrackColor = CharcoalCardAlt
                             )
                         )
+                    }
+                }
+            }
+
+            Text(
+                text = "ESTATE PLANNING & DIGITAL WILL VAULT",
+                style = MaterialTheme.typography.labelMedium.copy(color = ChampagneGold, letterSpacing = 2.sp)
+            )
+
+            // Modul Digital Will System
+            val estateManager = remember { com.example.data.model.EstateSettingsManager(context) }
+            val plan = remember { mutableStateOf(estateManager.loadEstatePlan()) }
+            
+            var heirNameState by remember { mutableStateOf(plan.value.heirName) }
+            var heirContactState by remember { mutableStateOf(plan.value.heirContact) }
+            var secretMessageState by remember { mutableStateOf(plan.value.secretMessage) }
+            var inactiveDaysState by remember { mutableStateOf(plan.value.inactiveDays.toString()) }
+            var showWillSimOutput by remember { mutableStateOf<String?>(null) }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(0.5.dp, Color(0xFF2C2C2C))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text(
+                        "Dead Man's Switch Configuration",
+                        style = MaterialTheme.typography.titleMedium.copy(color = ChampagneGold, fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        "Jika sistem mendeteksi ketidakaktifan (Heartbeat Sync terhenti) selama waktu yang ditentukan, wasiat digital ini akan terdekripsi otomatis untuk ahli waris sah.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = TextSecondary)
+                    )
+
+                    // Form Pengisian Will
+                    OutlinedTextField(
+                        value = heirNameState,
+                        onValueChange = { heirNameState = it },
+                        label = { Text("Nama Lengkap Ahli Waris Sah", color = TextSecondary) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = ChampagneGold,
+                            unfocusedBorderColor = Color(0xFF2C2C2C),
+                            focusedContainerColor = CharcoalCardAlt,
+                            unfocusedContainerColor = CharcoalCardAlt
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = heirContactState,
+                        onValueChange = { heirContactState = it },
+                        label = { Text("Nomor Kontak / Email Ahli Waris", color = TextSecondary) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = ChampagneGold,
+                            unfocusedBorderColor = Color(0xFF2C2C2C),
+                            focusedContainerColor = CharcoalCardAlt,
+                            unfocusedContainerColor = CharcoalCardAlt
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = secretMessageState,
+                        onValueChange = { secretMessageState = it },
+                        label = { Text("Sandi Rahasia / Seed Phrase / Lokasi Brankas", color = TextSecondary) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = ChampagneGold,
+                            unfocusedBorderColor = Color(0xFF2C2C2C),
+                            focusedContainerColor = CharcoalCardAlt,
+                            unfocusedContainerColor = CharcoalCardAlt
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = inactiveDaysState,
+                        onValueChange = { inactiveDaysState = it },
+                        label = { Text("Jangka Waktu Tidak Aktif (Hari)", color = TextSecondary) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = ChampagneGold,
+                            unfocusedBorderColor = Color(0xFF2C2C2C),
+                            focusedContainerColor = CharcoalCardAlt,
+                            unfocusedContainerColor = CharcoalCardAlt
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Tombol Simpan Wasiat
+                        Button(
+                            onClick = {
+                                val days = inactiveDaysState.toIntOrNull() ?: 90
+                                estateManager.saveEstatePlan(
+                                    heirName = heirNameState,
+                                    heirContact = heirContactState,
+                                    secretMessage = secretMessageState,
+                                    inactiveDays = days
+                                )
+                                plan.value = estateManager.loadEstatePlan()
+                                Toast.makeText(context, "Sertifikat Digital Will berhasil di-encrypt & di-save!", Toast.LENGTH_SHORT).show()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = ChampagneGold, contentColor = ObsidianBackground),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Save Wasiat", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                        }
+
+                        // Tombol Simulasi Trigger (Demo)
+                        Button(
+                            onClick = {
+                                if (heirNameState.isEmpty() || secretMessageState.isEmpty()) {
+                                    Toast.makeText(context, "Harap isi Nama Ahli Waris dan isi Wasiat dulu ya!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    // Trigger langsung simulasi eksportasi
+                                    val days = inactiveDaysState.toIntOrNull() ?: 90
+                                    estateManager.saveEstatePlan(heirNameState, heirContactState, secretMessageState, days)
+                                    estateManager.setTriggerStatus(true)
+                                    
+                                    val fileWasiat = java.io.File(context.cacheDir, "VELORA_SECRET_WILL_DECRYPTED.txt")
+                                    val formattedWasiatText = """
+                                        ========================================
+                                        ⚠️ WASIAT RAHASIA DECRYPTED (DEMO AUTOMATION) ⚠️
+                                        ========================================
+                                        Ahli Waris Sah : $heirNameState
+                                        Hubungi Kontak  : $heirContactState
+                                        
+                                        PESAN UTAMA WASIAT EMAS:
+                                        "$secretMessageState"
+                                        
+                                        [Sistem didekripsi via offline-first key!]
+                                        Wasiat tersimpan di cache:
+                                        ${fileWasiat.absolutePath}
+                                    """.trimIndent()
+                                    fileWasiat.writeText(formattedWasiatText)
+                                    showWillSimOutput = formattedWasiatText
+                                    Toast.makeText(context, "Dead Man's Switch Terpicu! Berhasil eksportasi berkas.", Toast.LENGTH_LONG).show()
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = CharcoalCardAlt, contentColor = CrimsonRose),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Test Trigger Switch", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+
+                    // Card output hasil simulasi wasiat didekripsi
+                    if (showWillSimOutput != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF2C1E1E))
+                                .border(0.5.dp, CrimsonRose, RoundedCornerShape(10.dp))
+                                .padding(12.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("DECRYPTED SECURE INSTANCE LOG", color = CrimsonRose, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace))
+                                Text(showWillSimOutput ?: "", color = TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                                Button(
+                                    onClick = { 
+                                        showWillSimOutput = null
+                                        estateManager.setTriggerStatus(false)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = CharcoalCardAlt),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text("Reset Lock", color = TextPrimary, fontSize = 9.sp)
+                                }
+                            }
+                        }
                     }
                 }
             }

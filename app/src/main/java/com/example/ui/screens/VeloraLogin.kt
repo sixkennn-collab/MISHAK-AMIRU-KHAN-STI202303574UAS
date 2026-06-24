@@ -42,7 +42,7 @@ import com.example.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VeloraLogin(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (Boolean) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -233,10 +233,13 @@ fun VeloraLogin(
             Button(
                 onClick = {
                     keyboardController?.hide()
-                    // Cek username & password untuk demo
-                    if (username.trim().lowercase() == "velora" && password == "gold123") {
-                        Toast.makeText(context, "Akses Diterima: Klien VIP Velora", Toast.LENGTH_SHORT).show()
-                        onLoginSuccess()
+                    val targetUser = username.trim().lowercase()
+                    if (targetUser == "velora" && password == "gold123") {
+                        Toast.makeText(context, "Akses Diterima: Klien VIP Velora (Master Mode)", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess(false) // Master Mode
+                    } else if (targetUser == "velora" && password == "duress123") {
+                        Toast.makeText(context, "Akses Terverifikasi (Camouflage Mode)", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess(true) // Duress / Camouflage Mode
                     } else if (username.isBlank() || password.isBlank()) {
                         errorMessage = "Harap isi username dan password."
                     } else {
@@ -263,43 +266,83 @@ fun VeloraLogin(
                 )
             }
 
-            // Fitur isi otomatis (Quick Fill untuk Demo)
-            Card(
-                colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
-                border = BorderStroke(0.5.dp, Color(0xFF2C2C2C)),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        username = "velora"
-                        password = "gold123"
-                        errorMessage = null
-                    }
+            // Fitur isi otomatis ganda untuk kemudahan demo (Master & Duress)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
+                // Tombol Isi Master PIN
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                    border = BorderStroke(0.5.dp, Color(0xFF2C2C2C)),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .weight(1f)
+                        .clickable {
+                            username = "velora"
+                            password = "gold123"
+                            errorMessage = null
+                        }
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.VpnKey,
-                        contentDescription = "Kunci akses cepat",
-                        tint = ChampagneGold,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Ketuk untuk Akses Demo Vault",
-                            color = TextPrimary,
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.VpnKey,
+                            contentDescription = "Master Key",
+                            tint = ChampagneGold,
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = stringResource(id = R.string.demo_account_hint),
+                            text = "MASTER PIN",
+                            color = TextPrimary,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Text(
+                            text = "Akses Portofolio Real",
                             color = TextSecondary,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 10.sp
+                        )
+                    }
+                }
+
+                // Tombol Isi Duress PIN (Camouflage)
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = CharcoalSurface),
+                    border = BorderStroke(0.5.dp, Color(0xFF2C2C2C)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            username = "velora"
+                            password = "duress123"
+                            errorMessage = null
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Duress Key",
+                            tint = CrimsonRose,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "DURESS PIN",
+                            color = CrimsonRose,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Text(
+                            text = "Akses Kamuflase (10%)",
+                            color = TextSecondary,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 10.sp
                         )
                     }
                 }
